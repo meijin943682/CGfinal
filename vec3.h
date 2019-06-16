@@ -17,7 +17,6 @@
 #include <iostream>
 
 class vec3 {
-
 public:
 	vec3() {}
 	vec3(float e0, float e1, float e2) { e[0] = e0; e[1] = e1; e[2] = e2; }
@@ -48,36 +47,31 @@ public:
 	float e[3];
 };
 
-inline std::ostream& operator<<(std::ostream &os, const vec3 &t) 
-{
+inline std::ostream& operator<<(std::ostream &os, const vec3 &t) {
   os << t.x() << " " << t.y() << " " << t.z();
   return os;
 }
 
 
-inline void vec3::make_unit_vector() 
-{
+inline void vec3::make_unit_vector() {
   for(int i = 0; i < 3; i++){
     e[i] /= length();
   }
 }
 
-inline float dot(const vec3 &v1, const vec3 &v2) 
-{
+inline float dot(const vec3 &v1, const vec3 &v2) {
   return v1.e[0] * v2.e[0] +  v1.e[1] * v2.e[1] +  v1.e[2] * v2.e[2];
 }
 
-inline vec3 cross(const vec3 &v1, const vec3 &v2) 
-{
+inline vec3 cross(const vec3 &v1, const vec3 &v2) {
   return vec3(v1.e[1] * v2.e[2] - v1.e[2] * v2.e[1], v1.e[2] * v2.e[0] - v1.e[0] * v2.e[2], v1.e[0] * v2.e[1] - v1.e[1] * v2.e[0]);
 }
 
-inline vec3 unit_vector(vec3 v) 
-{
+inline vec3 unit_vector(vec3 v) {
   return vec3(v.e[0] / v.length(), v.e[1] / v.length(), v.e[2] / v.length());
 }
 
-inline vec3 operator *(const float t, const vec3 &v){
+inline vec3 operator *(const float t, const vec3 &v) {
   return vec3(v.e[0] * t, v.e[1] * t, v.e[2] * t);
 }
 

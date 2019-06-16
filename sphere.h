@@ -42,15 +42,6 @@ bool sphere::hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_l
       sort(rec_list.begin(), rec_list.end(), compare);
       return true;
     }
-    /*ta = ta > tmin? ta : tmax;
-    tb = tb > tmin? tb : tmax;
-    if((ta > tmin && ta < tmax) || (tb > tmin && tb < tmax)){
-      float t = ta > tb? tb : ta;
-      rec.t = t;
-      rec.p = r.origin() + t * r.direction();
-      rec.normal = unit_vector(rec.p - this -> center);
-      return true;
-    }*/
   }
   return false;
 }

@@ -24,11 +24,8 @@ bool plane::hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_li
   if(dot(r.direction(), this -> normal) != 0){
     float t = dot(this -> point - r.origin(), this -> normal) / dot(r.direction(), this -> normal);
     if(t > tmin && t < tmax){
-      float t2 = t + 0.0001;
-      hit_record rec(t, r.origin() + t * r.direction(), unit_vector(this -> normal)), 
-                 rec2(t2, r.origin() + t2 * r.direction(), unit_vector(this -> normal)); 
+      hit_record rec(t, r.origin() + t * r.direction(), unit_vector(this -> normal));
       rec_list.push_back(rec);
-      rec_list.push_back(rec2);
       return true;
     }
   }

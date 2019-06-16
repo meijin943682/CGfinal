@@ -54,8 +54,8 @@ bool cone :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_l
 
     t[0] = dot(this -> normal, pa - this -> point[0]) > 0? t[0] : tmax;
     t[1] = dot(this -> normal, pb - this -> point[0]) > 0? t[1] : tmax;
-    //t[0] = dot(this -> normal, pa - this -> point[0]) > 0 && dot(this -> normal, pa - this -> point[1]) < 0? t[0] : tmax;
-    //t[1] = dot(this -> normal, pb - this -> point[0]) > 0 && dot(this -> normal, pb - this -> point[1]) < 0? t[1] : tmax;
+    t[0] = dot(this -> normal, pa - this -> point[0]) > 0 && dot(this -> normal, pa - this -> point[1]) < 0? t[0] : tmax;
+    t[1] = dot(this -> normal, pb - this -> point[0]) > 0 && dot(this -> normal, pb - this -> point[1]) < 0? t[1] : tmax;
   }
 
   if(dot(r.direction(), this -> normal) != 0){
