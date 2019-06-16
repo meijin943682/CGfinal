@@ -130,9 +130,11 @@ int main()
   //hitable_list.push_back(new cylinder(vec3(2, 0.5, -2), vec3(0, -1, 0), 0.5, 0.5, vec3(1.0f, 1.0f, 1.0f)));
   //hitable_list.push_back(new cone(vec3(3, 0.5, -2), vec3(0, 1, 0), 5, 1, vec3(1.0f, 1.0f, 1.0f)));
   //hitable_list.push_back(new cone(vec3(5, 0, -10), vec3(0, -1, 0), 3, 1, vec3(1.0f, 1.0f, 1.0f)));
-  hitable_list.push_back(new compose(new sphere(vec3(0, 1.5, -10), 3, vec3(1.0f, 0, 0)), 
-                                     new compose(new sphere(vec3(-1.5, 0, -10), 3, vec3(0, 1.0f, 0)), 
-                                                 new sphere(vec3(1.5, 0, -10), 3, vec3(0, 0, 1.0f)), 2), 2));
+  //hitable_list.push_back(new compose(new sphere(vec3(0, 1.5, -10), 3, vec3(1.0f, 0, 0)), 
+  //                                   new compose(new sphere(vec3(-1.5, 0, -10), 3, vec3(0, 1.0f, 0)), 
+  //                                               new sphere(vec3(1.5, 0, -10), 3, vec3(0, 0, 1.0f)), 2), 0));
+  hitable_list.push_back(new compose(new sphere(vec3(2, 0, -10), 3, vec3(1.0f, 0, 0)), 
+                                     new sphere(vec3(1, 0, -10), 3, vec3(1.0f, 1.0f, 1.0f)), 0));
   //cube(vec3(0, 0, -2), vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1), vec3(1.0f, 1.0f, 0.0f));
   srand(1234);
 

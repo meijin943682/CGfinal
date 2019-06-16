@@ -40,7 +40,7 @@ public:
 	inline vec3& operator *=(const float t){ for(int i = 0; i < 3; i++) e[i] *= t; return *this; }
 	inline vec3& operator /=(const float t){ for(int i = 0; i < 3; i++) e[i] /= t; return *this; }
   
-	inline float length() const { return sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }
+	inline float length() const { return float(sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2])); }
 	inline float squared_length() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
 	inline void make_unit_vector();
 
@@ -51,7 +51,6 @@ inline std::ostream& operator<<(std::ostream &os, const vec3 &t) {
   os << t.x() << " " << t.y() << " " << t.z();
   return os;
 }
-
 
 inline void vec3::make_unit_vector() {
   for(int i = 0; i < 3; i++){
@@ -74,6 +73,5 @@ inline vec3 unit_vector(vec3 v) {
 inline vec3 operator *(const float t, const vec3 &v) {
   return vec3(v.e[0] * t, v.e[1] * t, v.e[2] * t);
 }
-
 
 #endif

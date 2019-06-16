@@ -22,6 +22,36 @@ vector<pair<hit_record, hit_record>> rec_pair_make(vector<hit_record>& rec_list,
 }
 
 bool union_rec(vector<pair<hit_record, hit_record> >& prime, vector<pair<hit_record, hit_record> >& sub, vector<hit_record>& com){
+  int prime_now = 0, sub_now = 0;
+  while(prime_now < int(prime.size()) || sub_now < int(sub.size())){
+    if(prime_now < int(prime.size()) && sub_now < int(sub.size())){
+      if(prime[prime_now].second.t <= sub[sub_now].first.t){
+        com.push_back(prime[prime_now].first), com.push_back(prime[prime_now].second);
+        prime_now += 1;
+      }
+      else if(sub[sub_now].second.t <= prime[prime_now].first.t){
+        com.push_back(sub[sub_now].first), com.push_back(sub[sub_now].second);
+        sub_now += 1;
+      }
+      else if(sub[sub_now].second.t <= prime[prime_now].second.t){
+        prime[prime_now].first = prime[prime_now].first.t <= sub[sub_now].first.t? prime[prime_now].first : sub[sub_now].first;
+        sub_now += 1;
+      }
+      else if(prime[prime_now].second.t <= sub[sub_now].second.t){
+        sub[sub_now].first = sub[sub_now].first.t <= prime[prime_now].first.t? sub[sub_now].first : prime[prime_now].first;
+        prime_now += 1;
+      }
+    }
+    else if(prime_now < int(prime.size())){
+      com.push_back(prime[prime_now].first), com.push_back(prime[prime_now].second);
+      prime_now += 1;
+    }
+    else if(sub_now < int(sub.size())){
+      com.push_back(sub[sub_now].first), com.push_back(sub[sub_now].second);
+      sub_now += 1;
+    }
+  }
+  if(com.size() != 0) return true;
   return false;
 }
 
@@ -70,10 +100,11 @@ bool compose :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& re
   bool (*func[])(vector<pair<hit_record, hit_record> >&, vector<pair<hit_record, hit_record> >&, vector<hit_record>&) = 
         {union_rec, difference_rec, intersection_rec};
 
-  if(this -> object_prime -> hit(r, tmin, tmax, prime_rec_list) && this -> object_sub -> hit(r, tmin, tmax, sub_rec_list)){
+  bool prime_hit = this -> object_prime -> hit(r, tmin, tmax, prime_rec_list), sub_hit = this -> object_sub -> hit(r, tmin, tmax, sub_rec_list);
+  if(prime_hit || sub_hit){
     vector<pair<hit_record, hit_record> > prime_pair_list = rec_pair_make(prime_rec_list, r, ht_min, ht_max),
                                           sub_pair_list = rec_pair_make(sub_rec_list, r, ht_min, ht_max);
-
+    
     if(func[this -> operation](prime_pair_list, sub_pair_list, rec_list))
       return true;
   }
