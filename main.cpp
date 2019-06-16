@@ -134,7 +134,7 @@ int main()
   //                                   new compose(new sphere(vec3(-1.5, 0, -10), 3, vec3(0, 1.0f, 0)), 
   //                                               new sphere(vec3(1.5, 0, -10), 3, vec3(0, 0, 1.0f)), 2), 0));
   hitable_list.push_back(new compose(new sphere(vec3(2, 0, -10), 3, vec3(1.0f, 0, 0)), 
-                                     new sphere(vec3(1, 0, -10), 3, vec3(1.0f, 1.0f, 1.0f)), 0));
+                                     new sphere(vec3(-2, 0, -9), 3, vec3(1.0f, 1.0f, 1.0f)), 1));
   //cube(vec3(0, 0, -2), vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1), vec3(1.0f, 1.0f, 0.0f));
   srand(1234);
 

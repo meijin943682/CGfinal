@@ -9,7 +9,7 @@ class ray{
         vec3 origin() const       { return O; }
         vec3 direction() const    { return D; }
         vec3 point_at_parameter(float t) const { return O + D * t;}
-
+    private:
         vec3 O;
         vec3 D;
 };
