@@ -55,7 +55,6 @@ public:
   compose() {}
   compose(hitable* obj_prime, hitable* obj_sub, int op) : object_prime(obj_prime), object_sub(obj_sub), operation(op){}
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
-  vec3 colors(hit_record record){ return vec3(1, 1, 1); }
 
 private:
   hitable* object_prime;
@@ -64,7 +63,8 @@ private:
 };
 
 bool compose :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list) {
-  hit_record ht_min(tmin, r.origin() + tmin * r.direction(), r.direction()), ht_max(tmax, r.origin() + tmax * r.direction(), r.direction());
+  hit_record ht_min(tmin, r.origin() + tmin * r.direction(), r.direction(), vec3(0, 0, 0)), 
+             ht_max(tmax, r.origin() + tmax * r.direction(), r.direction(), vec3(0, 0, 0));
   vector<hit_record> prime_rec_list, sub_rec_list;
 
   bool (*func[])(vector<pair<hit_record, hit_record> >&, vector<pair<hit_record, hit_record> >&, vector<hit_record>&) = 
@@ -81,3 +81,4 @@ bool compose :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& re
 }
 
 #endif
+

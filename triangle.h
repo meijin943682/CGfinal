@@ -17,7 +17,6 @@ public:
     normal = unit_vector(cross(point[1] - point[0], point[2] - point[0]));
   }
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
-  vec3 colors(hit_record record){ return color; }
 
 private:
   vec3 color;
@@ -44,6 +43,7 @@ bool triangle :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& r
         rec.t = t;
         rec.p = hitPoint;
         rec.normal = unit_vector(this -> normal);
+        rec.color = this -> color;
         rec_list.push_back(rec);
         return true;
       }

@@ -17,7 +17,6 @@ public:
       radian = atan(r / h);
   }
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
-  vec3 colors(hit_record record){ return color; }
 
 private:
   vec3 point[2];
@@ -76,6 +75,7 @@ bool cone :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_l
       vec3 hitp_origin = rec.p - this -> point[0];
       rec.normal = i < 2? unit_vector(dot(hitp_origin, point[1] - point[0]) * hitp_origin + point[0] - point[1]) : this -> normal;
       rec.normal = rec.p == this -> point[0]? this -> normal * -1 : rec.normal;
+      rec.color = this -> color;
       rec_list.push_back(rec);
     }
   }

@@ -11,7 +11,6 @@ public:
   sphere(vec3 c, float r, vec3 col, float w_ri = 0.0f, float w_ti = 0.0f, float m = 1.0f) : 
   hitable(w_ri, w_ti, m), center(c), radius(r), color(col) {};
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
-  vec3 colors(hit_record record){ return color; }
 
 private:
   vec3 center;
@@ -35,6 +34,7 @@ bool sphere::hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_l
         rec.t = t[i];
         rec.p = r.origin() + t[i] * r.direction();
         rec.normal = unit_vector(rec.p - this -> center);
+        rec.color = this -> color;
         rec_list.push_back(rec);
       }
     }

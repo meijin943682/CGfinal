@@ -16,7 +16,6 @@ public:
       point[1] = p + normal * h;
   }
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
-  vec3 colors(hit_record record){ return color; }
 
 private:
   vec3 point[2];
@@ -67,6 +66,7 @@ bool cylinder :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& r
       rec.t = t[i];
       rec.p = r.origin() + t[i] * r.direction();
       rec.normal = i < 2? unit_vector(rec.p - point[0] - dot(rec.p - point[0], this -> normal) * this -> normal) : this -> normal;
+      rec.color = this -> color;
       rec_list.push_back(rec);
     }
   }

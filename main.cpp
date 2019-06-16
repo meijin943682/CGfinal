@@ -30,9 +30,9 @@ vec3 refract(vec3& I, vec3& N, float eta, bool inner){
   return unit_vector(R);
 }
 
-vec3 shading(vec3 lightSource, vec3 lightIntensity, hit_record ht, vec3 Kd, bool inner)
+vec3 shading(vec3 lightSource, vec3 lightIntensity, hit_record ht, bool inner)
 {
-  vec3 lightDir = unit_vector(lightSource - ht.p);
+  vec3 lightDir = unit_vector(lightSource - ht.p), Kd = ht.color;
   vec3 lightOffset = 0.5 * unit_vector(vec3(0, 1, 0) - dot(vec3(0, 1, 0), lightDir) * lightDir);
   ray shadowRay[3];
   shadowRay[0] = ray(ht.p, lightDir);
@@ -72,7 +72,7 @@ vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
   ray r(p, d);
   hitable* it;
   
-  hit_record record(TMAX, vec3(0, 0, 0), vec3(0, 0, 0));
+  hit_record record(TMAX, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0));
   vector<hit_record> new_record_list;
 
   vec3 lightPosition(0, 10, 10);
@@ -93,7 +93,7 @@ vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
 
   if(record.t != TMAX){
     float length = record.t * r.direction().length();
-    local = shading(lightPosition, lightIntensity, record, it -> colors(record), inner);
+    local = shading(lightPosition, lightIntensity, record, inner);
     reflected = trace(record.p, unit_vector(d - 2 * dot(d, record.normal) * record.normal), step + 1, inner, lightRatio - length / 50);
     transmitted = trace(record.p, refract(d, record.normal, 1.0f / it -> material, inner), step + 1, !inner, lightRatio - length / 50);
   }
@@ -130,9 +130,9 @@ int main()
   //hitable_list.push_back(new cylinder(vec3(2, 0.5, -2), vec3(0, -1, 0), 0.5, 0.5, vec3(1.0f, 1.0f, 1.0f)));
   //hitable_list.push_back(new cone(vec3(3, 0.5, -2), vec3(0, 1, 0), 5, 1, vec3(1.0f, 1.0f, 1.0f)));
   //hitable_list.push_back(new cone(vec3(5, 0, -10), vec3(0, -1, 0), 3, 1, vec3(1.0f, 1.0f, 1.0f)));
-  hitable_list.push_back(new compose(new sphere(vec3(5.5, 0.5, -10), 1, vec3(1.0f, 1.0f, 1.0f)), 
-                                     new compose(new sphere(vec3(5, 0, -10), 1, vec3(1.0f, 1.0f, 1.0f)), 
-                                                 new sphere(vec3(6, 0, -10), 1, vec3(1.0f, 1.0f, 1.0f)), 2), 2));
+  hitable_list.push_back(new compose(new sphere(vec3(0, 1.5, -10), 3, vec3(1.0f, 0, 0)), 
+                                     new compose(new sphere(vec3(-1.5, 0, -10), 3, vec3(0, 1.0f, 0)), 
+                                                 new sphere(vec3(1.5, 0, -10), 3, vec3(0, 0, 1.0f)), 2), 2));
   //cube(vec3(0, 0, -2), vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1), vec3(1.0f, 1.0f, 0.0f));
   srand(1234);
 

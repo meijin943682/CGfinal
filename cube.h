@@ -1,4 +1,4 @@
-:/*void square(vec3 start, vec3 width, vec3 height, vec3 col, float w_r = 0.0f, float w_t = 0.0f, float m = 1.0f){
+void square(vec3 start, vec3 width, vec3 height, vec3 col, float w_r = 0.0f, float w_t = 0.0f, float m = 1.0f){
 
   vec3 point[3];
   
@@ -22,4 +22,4 @@ void cube(vec3 left_down_point, vec3 width, vec3 height, vec3 depth, vec3 col, f
   square(left_down_point, height, depth, col, w_r, w_t, m);
   square(right_up_point, depth, height, col, w_r, w_t, m);
 }
-*/
+
