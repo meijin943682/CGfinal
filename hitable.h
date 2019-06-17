@@ -7,13 +7,18 @@
 
 using namespace std;
 
-struct hit_record {
+class hit_record {
+public:
   hit_record(){}
-  hit_record(float T, vec3 P, vec3 Normal, vec3 col) : t(T), p(P), normal(Normal), color(col){}
+  hit_record(float T, vec3 P, vec3 Normal, vec3 col, float w_ri = 0.0f, float w_ti = 0.0f, float m = 1.0f) 
+    : t(T), p(P), normal(Normal), color(col), w_r(w_ri), w_t(w_ti), material(m){}
   float t;
   vec3 p;
   vec3 normal;
   vec3 color;
+  float w_r;
+  float w_t;
+  float material;
 };
 
 class hitable {

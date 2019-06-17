@@ -69,13 +69,11 @@ bool cone :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_l
 
   for(int i = 0; i < 3; i++){
     if(tmin < t[i] && t[i] < tmax){
-      hit_record rec;
-      rec.t = t[i];
-      rec.p = r.origin() + t[i] * r.direction();
+      vec3 hit_point = r.origin() + t[i] * r.direction();
+      hit_record rec(t[i], hit_point, this -> normal, this -> color, this -> w_r, this -> w_t, this -> material);
       vec3 hitp_origin = rec.p - this -> point[0];
       rec.normal = i < 2? unit_vector(dot(hitp_origin, point[1] - point[0]) * hitp_origin + point[0] - point[1]) : this -> normal;
       rec.normal = rec.p == this -> point[0]? this -> normal * -1 : rec.normal;
-      rec.color = this -> color;
       rec_list.push_back(rec);
     }
   }

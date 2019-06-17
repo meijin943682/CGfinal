@@ -26,24 +26,20 @@ private:
 };
 
 bool triangle :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list) {
-  if(dot(r.direction(), this -> normal) < 0){
+  if(dot(r.direction(), this -> normal) != 0){
     float t = dot(this -> point[0] - r.origin(), this -> normal) / dot(r.direction(), this -> normal);
     if(t > tmin && t < tmax){
-      vec3 hitPoint = r.origin() + t * r.direction();
+      vec3 hit_point = r.origin() + t * r.direction();
       vec3 C[3];
       
       for(int i = 0; i < 3; i++){
-        C[i] = hitPoint - point[i];
+        C[i] = hit_point - point[i];
       }
 
       if(dot(this -> normal, cross(this -> edge[0], C[0])) >= 0 && 
          dot(this -> normal, cross(this -> edge[1], C[1])) >= 0 && 
          dot(this -> normal, cross(this -> edge[2], C[2])) >= 0){
-        hit_record rec;
-        rec.t = t;
-        rec.p = hitPoint;
-        rec.normal = unit_vector(this -> normal);
-        rec.color = this -> color;
+        hit_record rec(t, hit_point, unit_vector(this -> normal), this -> color, this -> w_r, this -> w_t, this -> material);
         rec_list.push_back(rec);
         return true;
       }

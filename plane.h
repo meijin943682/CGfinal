@@ -23,7 +23,8 @@ bool plane::hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_li
   if(dot(r.direction(), this -> normal) != 0){
     float t = dot(this -> point - r.origin(), this -> normal) / dot(r.direction(), this -> normal);
     if(t > tmin && t < tmax){
-      hit_record rec(t, r.origin() + t * r.direction(), unit_vector(this -> normal), vec3(0, 0, 0));
+      vec3 hit_point = r.origin() + t * r.direction();
+      hit_record rec(t, hit_point, unit_vector(this -> normal), vec3(0, 0, 0), this -> w_r, this -> w_t, this -> material);
       rec.color = ((int)(floor(rec.p.x()) + floor(rec.p.z())) % 2 == 0)? this -> color1 : this -> color2;
       rec_list.push_back(rec);
       return true;

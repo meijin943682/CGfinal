@@ -62,11 +62,9 @@ bool cylinder :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& r
   }
   for(int i = 0; i < 4; i++){
     if(tmin < t[i] && t[i] < tmax){
-      hit_record rec;
-      rec.t = t[i];
-      rec.p = r.origin() + t[i] * r.direction();
+      vec3 hit_point = r.origin() + t[i] * r.direction();
+      hit_record rec(t[i], hit_point, this -> normal, this -> color, this -> w_r, this -> w_t, this -> material);
       rec.normal = i < 2? unit_vector(rec.p - point[0] - dot(rec.p - point[0], this -> normal) * this -> normal) : this -> normal;
-      rec.color = this -> color;
       rec_list.push_back(rec);
     }
   }

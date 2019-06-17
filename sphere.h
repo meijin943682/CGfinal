@@ -30,11 +30,8 @@ bool sphere::hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_l
     t[1] = (-1 * b + sqrt(b * b - 4 * a * c)) / (2 * a);
     for(int i = 0; i < 2; i++){
       if(t[i] > tmin && t[i] < tmax){
-        hit_record rec;
-        rec.t = t[i];
-        rec.p = r.origin() + t[i] * r.direction();
-        rec.normal = unit_vector(rec.p - this -> center);
-        rec.color = this -> color;
+        vec3 hit_point = r.origin() + t[i] * r.direction();
+        hit_record rec(t[i], hit_point, unit_vector(hit_point - this -> center), this -> color, this -> w_r, this -> w_t, this -> material);
         rec_list.push_back(rec);
       }
     }

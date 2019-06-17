@@ -6,6 +6,7 @@
 #include "sphere.h"
 #include "plane.h"
 #include "triangle.h"
+#include "cube.h"
 #include "cylinder.h"
 #include "cone.h"
 #include "compose.h"
@@ -13,7 +14,7 @@
 
 #define TMIN 0.001f
 #define TMAX 10000
-#define TRACEMAX 1
+#define TRACEMAX 5
 
 using namespace std;
 vector<hitable*> hitable_list;
@@ -34,13 +35,14 @@ vec3 shading(vec3 lightSource, vec3 lightIntensity, hit_record ht, bool inner)
 {
   vec3 lightDir = unit_vector(lightSource - ht.p), Kd = ht.color;
   vec3 lightOffset = 0.5 * unit_vector(vec3(0, 1, 0) - dot(vec3(0, 1, 0), lightDir) * lightDir);
+  hit_record record(TMAX, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0));
+
   ray shadowRay[3];
   shadowRay[0] = ray(ht.p, lightDir);
   shadowRay[1] = ray(ht.p, unit_vector(lightSource + lightOffset - ht.p));
   shadowRay[2] = ray(ht.p, unit_vector(lightSource - lightOffset - ht.p));
   
   vector<hit_record> new_record_list;
-  hitable* it;
   vec3 color(0, 0, 0);
   float shadowRatio[3] = {0.5, 0.25, 0.25};
 
@@ -50,17 +52,19 @@ vec3 shading(vec3 lightSource, vec3 lightIntensity, hit_record ht, bool inner)
     for(vector<hitable*> :: iterator iter = hitable_list.begin(); 
         iter != hitable_list.end(); iter++){
       new_record_list.clear();
-      if((*iter) -> hit(shadowRay[i], TMIN, TMAX, new_record_list)){
+      if((*iter) -> hit(shadowRay[i], TMIN, TMAX, new_record_list) && record.t > new_record_list[0].t){
         flag = true;
-        it = *iter;
+        record = new_record_list[0];
       }
     }
     if(!flag){
 	    color_new = max(float(0), dot(ht.normal * (inner? -1 : 1), shadowRay[i].direction())) * lightIntensity * Kd;
     }
     else{
-	    color_new = (it -> w_r + it -> w_t) / 2 * max(float(0), dot(ht.normal * (inner? -1 : 1), shadowRay[i].direction())) * lightIntensity * Kd 
-        + (1 - (it -> w_r + it -> w_t) / 2) * vec3(0, 0, 0);
+      //float alpha = (record.w_r + record.w_t) / float(2);
+      float alpha = (1 - record.w_r) * (1 - record.w_t);
+	    color_new = (1 - alpha) * max(float(0), dot(ht.normal * (inner? -1 : 1), shadowRay[i].direction())) * lightIntensity * Kd 
+        + alpha * vec3(0, 0, 0);
     }
     color += (shadowRatio[i] * color_new);
   }
@@ -70,12 +74,12 @@ vec3 shading(vec3 lightSource, vec3 lightIntensity, hit_record ht, bool inner)
 vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
   vec3 local(0, 0, 0), reflected(0, 0, 0), transmitted(0, 0, 0);
   ray r(p, d);
-  hitable* it;
   
   hit_record record(TMAX, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0, 0, 0));
   vector<hit_record> new_record_list;
 
   vec3 lightPosition(0, 10, 10);
+  //vec3 lightPosition(0, 1, 0);
   vec3 lightIntensity = vec3(1, 1, 1); 
   
   if(step >= TRACEMAX || lightRatio < 0){
@@ -85,17 +89,15 @@ vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
   for(vector<hitable*> :: iterator iter = hitable_list.begin(); 
       iter != hitable_list.end(); iter++){
     new_record_list.clear();
-    if((*iter) -> hit(r, TMIN, TMAX, new_record_list) && record.t > new_record_list[0].t){
+    if((*iter) -> hit(r, TMIN, TMAX, new_record_list) && record.t > new_record_list[0].t)
       record = new_record_list[0];
-      it = *iter;
-    }
   }
 
   if(record.t != TMAX){
     float length = record.t * r.direction().length();
     local = shading(lightPosition, lightIntensity, record, inner);
     reflected = trace(record.p, unit_vector(d - 2 * dot(d, record.normal) * record.normal), step + 1, inner, lightRatio - length / 50);
-    transmitted = trace(record.p, refract(d, record.normal, 1.0f / it -> material, inner), step + 1, !inner, lightRatio - length / 50);
+    transmitted = trace(record.p, refract(d, record.normal, 1.0f / record.material, inner), step + 1, !inner, lightRatio - length / 50);
   }
   else{
     float t = 0.5 * (d.y() + 1.0);
@@ -103,8 +105,8 @@ vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
     return local;
   }
 
-  return  local 
-          + it -> w_r * reflected + it -> w_t * transmitted;
+  //return  local + record.w_r * reflected + record.w_t * transmitted;
+  return  (1.0 - record.w_t) * ((1.0 - record.w_r) * local + record.w_r * reflected) + record.w_t * transmitted;
 }
 
 int main()
@@ -119,23 +121,30 @@ int main()
   vec3 origin(0, 0, 1);
   vec3 horizontal(4, 0, 0);
   vec3 vertical(0, 2, 0);
-  camera cam(vec3(0, 0, 10), vec3(0, 0, -1), vec3(0, 1, 0), 60,  float(width) / float(height), 0.1, 11);
+  camera cam(vec3(2, 0, 10), vec3(0, 0, -1), vec3(0, 1, 0), 60,  float(width) / float(height), 0.1, 11);
 
   file << "P3\n" << width << " " << height << "\n255\n";
 
-  //hitable_list.push_back(new plane(vec3(0, -2, 0), vec3(0, 1, 0), vec3(1.0f, 0.0f, 0.0f))); //ground
+  hitable_list.push_back(new plane(vec3(0, -5, 0), vec3(0, 1, 0), vec3(1.0f, 0.0f, 0.0f))); //ground
   //hitable_list.push_back(new sphere(vec3(0, 0, -2), 0.5, vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.9f, 1.46f));
   //hitable_list.push_back(new sphere(vec3(1, 0, -1.75), 0.5, vec3(1.0f, 1.0f, 1.0f), 0.9f));
   //hitable_list.push_back(new sphere(vec3(-1, 0, -2.25), 0.5, vec3(1.0f, 0.7f, 0.3f)));
-  //hitable_list.push_back(new cylinder(vec3(2, 0.5, -2), vec3(0, -1, 0), 0.5, 0.5, vec3(1.0f, 1.0f, 1.0f)));
-  //hitable_list.push_back(new cone(vec3(3, 0.5, -2), vec3(0, 1, 0), 5, 1, vec3(1.0f, 1.0f, 1.0f)));
+  hitable_list.push_back(new cylinder(vec3(2, 0.5, -2), vec3(0, -1, 0), 0.5, 0.5, vec3(1.0f, 1.0f, 1.0f), 0.9f));
+  hitable_list.push_back(new cylinder(vec3(-2, 0.5, -2), vec3(0, -1, 0), 0.5, 0.5, vec3(1.0f, 1.0f, 1.0f)));
+  //hitable_list.push_back(new cone(vec3(3, 0.5, -2), vec3(0, 1, 0), 5, 1, vec3(1.0f, 1.0f, 1.0f), 0.9f));
   //hitable_list.push_back(new cone(vec3(5, 0, -10), vec3(0, -1, 0), 3, 1, vec3(1.0f, 1.0f, 1.0f)));
-  //hitable_list.push_back(new compose(new sphere(vec3(0, 1.5, -10), 3, vec3(1.0f, 0, 0)), 
-  //                                   new compose(new sphere(vec3(-1.5, 0, -10), 3, vec3(0, 1.0f, 0)), 
-  //                                               new sphere(vec3(1.5, 0, -10), 3, vec3(0, 0, 1.0f)), 2), 0));
-  hitable_list.push_back(new compose(new sphere(vec3(2, 0, -10), 3, vec3(1.0f, 0, 0)), 
-                                     new sphere(vec3(-2, 0, -9), 3, vec3(1.0f, 1.0f, 1.0f)), 1));
-  //cube(vec3(0, 0, -2), vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, -1), vec3(1.0f, 1.0f, 0.0f));
+  /*
+  hitable_list.push_back(new compose(new sphere(vec3(0, 1.5, -10), 3, vec3(1.0f, 1.0f, 1.0f), 0.9f), 
+                                     new compose(new sphere(vec3(-1.5, 0, -10), 3, vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.9f, 1.46f), 
+                                                 new sphere(vec3(1.5, 0, -10), 3, vec3(1.0f, 1.0f, 1.0f)), 0.9), 2));
+  */
+  /*hitable_list.push_back(new compose(new sphere(vec3(2, 0, -10), 3, vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.9f, 1.46f), 
+                                     new sphere(vec3(2, 0, -10), 2, vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.9f, 1.46f), 1));
+  */
+  
+  //hitable_list.push_back(new compose(new sphere(vec3(0, -1, -4), 1.5, vec3(1, 1, 1), 0.0f, 0.9f, 1.46f),
+  //  hitable_list.push_back(new compose(new cube(vec3(-2, -3, -2), vec3(4, 0, 0), vec3(0, 4, 0), 4, vec3(1.0f, 1.0f, 0.0f)),
+  //                                   new cube(vec3(-1.8, -2.8, -1), vec3(3.6, 0, 0), vec3(0, 3.6, 0), 6, vec3(1.0f, 0.0f, 0.0f)), 1));
   srand(1234);
 
   vec3 colorlist[8] = { vec3(0.8, 0.3, 0.3), vec3(0.3, 0.8, 0.3), vec3(0.3, 0.3, 0.8),
