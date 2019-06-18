@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <algorithm>
-#include <iostream>
 
 using namespace std;
 
@@ -24,9 +23,10 @@ public:
 class hitable {
 public:
   hitable() {};
-  hitable(float w_ri, float w_ti, float m) : w_r(w_ri), w_t(w_ti), material(m) {};
+  hitable(vec3 col, float w_ri, float w_ti, float m) : color(col), w_r(w_ri), w_t(w_ti), material(m) {};
   virtual bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list) = 0;
 
+  vec3 color;
   float w_r;
   float w_t;
   float material;

@@ -10,7 +10,7 @@ class cone : public hitable {
 public:
   cone() {}
   cone(vec3 p, vec3 n, float r, float h, vec3 col, float w_ri = 0.0f, float w_ti = 0.0f, float m = 1.0f) 
-    : hitable(w_ri, w_ti, m), radius(r), height(h), color(col) {
+    : hitable(col, w_ri, w_ti, m), radius(r), height(h) {
       normal = unit_vector(n);
       point[0] = p;
       point[1] = p + normal * h;
@@ -24,7 +24,6 @@ private:
   float radius;
   float height;
   double radian;
-  vec3 color;
 };
 
 bool cone :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list) {

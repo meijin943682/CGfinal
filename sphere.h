@@ -9,13 +9,12 @@ class sphere: public hitable {
 public:
   sphere() {};
   sphere(vec3 c, float r, vec3 col, float w_ri = 0.0f, float w_ti = 0.0f, float m = 1.0f) : 
-  hitable(w_ri, w_ti, m), center(c), radius(r), color(col) {};
+  hitable(col, w_ri, w_ti, m), center(c), radius(r) {};
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
 
 private:
   vec3 center;
   float radius;
-  vec3 color;
 };
 
 bool sphere::hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list){

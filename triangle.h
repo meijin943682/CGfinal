@@ -9,7 +9,7 @@
 class triangle : public hitable {
 public:
   triangle() {}
-  triangle(vec3 p[], vec3 col, float w_ri = 0.0f, float w_ti = 0.0f, float m = 1.0f) : hitable(w_ri, w_ti, m), color(col) { 
+  triangle(vec3 p[], vec3 col, float w_ri = 0.0f, float w_ti = 0.0f, float m = 1.0f) : hitable(col, w_ri, w_ti, m) { 
     for(int i = 0; i < 3; i++){
       point[i] = p[i];
       edge[i] = p[(i + 1) % 3] - p[i];
@@ -19,7 +19,6 @@ public:
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
 
 private:
-  vec3 color;
   vec3 point[3];
   vec3 edge[3];
   vec3 normal;

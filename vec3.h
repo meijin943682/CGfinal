@@ -14,7 +14,6 @@
 
 #include <math.h>
 #include <limits>
-#include <iostream>
 
 class vec3 {
 public:

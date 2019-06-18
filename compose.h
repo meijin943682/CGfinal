@@ -64,16 +64,21 @@ bool union_rec(vector<pair<hit_record, hit_record> >& prime, vector<pair<hit_rec
 bool difference_rec(vector<pair<hit_record, hit_record> >& prime, vector<pair<hit_record, hit_record> >& sub, vector<hit_record>& com){
   int prime_now = 0, sub_now = 0;
   while(prime_now < int(prime.size()) && sub_now < int(sub.size())){
+    hit_record record_now = prime[prime_now].first;
     if(prime[prime_now].second.t <= sub[sub_now].second.t){
-      if(prime[prime_now].first.t < sub[sub_now].first.t)
-        com.push_back(prime[prime_now].first), com.push_back(sub[sub_now].first);
+      if(prime[prime_now].first.t < sub[sub_now].first.t){
+        record_now.t = sub[sub_now].first.t, record_now.p = sub[sub_now].first.p, record_now.normal = sub[sub_now].first.normal * -1;
+        com.push_back(prime[prime_now].first), com.push_back(record_now);
+      }
       prime_now += 1;
     }
     else if(sub[sub_now].second.t <= prime[prime_now].second.t){
-      if(prime[prime_now].first.t < sub[sub_now].first.t)
-        com.push_back(prime[prime_now].first), com.push_back(sub[sub_now].first);
-      sub[sub_now].second.normal *= -1;
-      prime[prime_now].first = sub[sub_now].second;
+      if(prime[prime_now].first.t < sub[sub_now].first.t){
+        record_now.t = sub[sub_now].first.t, record_now.p = sub[sub_now].first.p, record_now.normal = sub[sub_now].first.normal * -1;
+        com.push_back(prime[prime_now].first), com.push_back(record_now);
+      }
+      record_now.t = sub[sub_now].second.t, record_now.p = sub[sub_now].second.p, record_now.normal = sub[sub_now].second.normal * -1;
+      prime[prime_now].first = record_now;
       sub_now += 1;
     }
   }
@@ -127,8 +132,10 @@ private:
 };
 
 bool compose :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list) {
-  hit_record hit_min(tmin, r.origin() + tmin * r.direction(), r.direction(), vec3(0, 0, 0)),
-             hit_max(tmax, r.origin() + tmax * r.direction(), r.direction(), vec3(0, 0, 0));
+  hit_record hit_min(tmin, r.origin() + tmin * r.direction(), r.direction(), 
+                      object_prime -> color, object_prime -> w_r, object_prime -> w_t, object_prime -> material),
+             hit_max(tmax, r.origin() + tmax * r.direction(), r.direction(), 
+                      object_prime -> color, object_prime -> w_r, object_prime -> w_t, object_prime -> material);
   vector<hit_record> prime_rec_list, sub_rec_list;
   ht_min = hit_min, ht_max = hit_max;
 
