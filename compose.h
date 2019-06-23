@@ -68,6 +68,7 @@ bool difference_rec(vector<pair<hit_record, hit_record> >& prime, vector<pair<hi
     if(prime[prime_now].second.t <= sub[sub_now].second.t){
       if(prime[prime_now].first.t < sub[sub_now].first.t){
         record_now.t = sub[sub_now].first.t, record_now.p = sub[sub_now].first.p, record_now.normal = sub[sub_now].first.normal * -1;
+        record_now.color = sub[sub_now].first.color;
         com.push_back(prime[prime_now].first), com.push_back(record_now);
       }
       prime_now += 1;
@@ -75,9 +76,11 @@ bool difference_rec(vector<pair<hit_record, hit_record> >& prime, vector<pair<hi
     else if(sub[sub_now].second.t <= prime[prime_now].second.t){
       if(prime[prime_now].first.t < sub[sub_now].first.t){
         record_now.t = sub[sub_now].first.t, record_now.p = sub[sub_now].first.p, record_now.normal = sub[sub_now].first.normal * -1;
+        record_now.color = sub[sub_now].first.color;
         com.push_back(prime[prime_now].first), com.push_back(record_now);
       }
       record_now.t = sub[sub_now].second.t, record_now.p = sub[sub_now].second.p, record_now.normal = sub[sub_now].second.normal * -1;
+      record_now.color = sub[sub_now].second.color;
       prime[prime_now].first = record_now;
       sub_now += 1;
     }
@@ -124,6 +127,7 @@ public:
   compose() {}
   compose(hitable* obj_prime, hitable* obj_sub, int op) : object_prime(obj_prime), object_sub(obj_sub), operation(op){}
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
+  void move(vec3 dir, float length){ object_prime -> move(unit_vector(dir), length), object_sub -> move(unit_vector(dir), length); }
 
 private:
   hitable* object_prime;

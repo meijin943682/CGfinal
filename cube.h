@@ -20,7 +20,7 @@ class cube : public hitable {
 public:
   cube() {}
   cube(vec3 ld_point, vec3 w, vec3 h, float d, vec3 col, float w_r = 0.0f, float w_t = 0.0f, float m = 1.0f)
-  : left_down_point(ld_point), width(w), height(h), color(col){
+  : hitable(col, w_r, w_t, m), left_down_point(ld_point), width(w), height(h){
     depth = d * unit_vector(cross(h, w));
     vec3 right_up_point = left_down_point + width + height + depth;
 
@@ -34,6 +34,7 @@ public:
     square(right_up_point, depth * -1, height * -1, col, faces, w_r, w_t, m);
   }
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
+  void move(vec3 dir, float length){ for(int i = 0; i < int(faces.size()); i++) faces[i].move(unit_vector(dir), length); }
 
 private:
   vector<triangle> faces;
@@ -41,7 +42,6 @@ private:
   vec3 width;
   vec3 height;
   vec3 depth;
-  vec3 color;
 };
 
 bool cube :: hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list){

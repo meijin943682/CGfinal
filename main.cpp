@@ -15,10 +15,14 @@
 #define TMIN 0.001f
 #define TMAX 10000
 #define TRACEMAX 5
+#define SPECULAR 50
+#define WIDTH 600
+#define HEIGHT 300
 
 using namespace std;
 vector<hitable*> hitable_list;
 vector<pair<vec3, vec3> > light_list;
+uint8_t image[WIDTH][HEIGHT][3][3];
 
 vec3 refract(vec3& I, vec3& N, float eta, bool inner){
   eta = inner? 1 / eta : eta;
@@ -32,7 +36,7 @@ vec3 refract(vec3& I, vec3& N, float eta, bool inner){
   return unit_vector(R);
 }
 
-vec3 shading(hit_record ht, bool inner)
+vec3 shading(hit_record ht, bool inner, vec3 reflect_ray)
 {
   vec3 color(0, 0, 0);
   for(int i = 0; i < int(light_list.size()); i += 1){
@@ -63,7 +67,8 @@ vec3 shading(hit_record ht, bool inner)
         }
       }
       if(!flag){
-        color_new = max(float(0), dot(ht.normal * (inner? -1 : 1), shadowRay[i].direction())) * lightIntensity * Kd;
+        color_new = max(float(0), dot(ht.normal * (inner? -1 : 1), shadowRay[i].direction())) * lightIntensity * Kd
+                    + pow(dot(reflect_ray, lightDir), SPECULAR) * lightIntensity;
       }
       else{
         float alpha = (1 - record.w_r) * (1 - record.w_t);
@@ -96,8 +101,9 @@ vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
 
   if(record.t != TMAX){
     float length = record.t * r.direction().length();
-    local = shading(record, inner);
-    reflected = trace(record.p, unit_vector(d - 2 * dot(d, record.normal) * record.normal), step + 1, inner, lightRatio - length / 50);
+    vec3 reflect_ray = unit_vector(d - 2 * dot(d, record.normal) * record.normal);
+    local = shading(record, inner, reflect_ray);
+    reflected = trace(record.p, reflect_ray, step + 1, inner, lightRatio - length / 50);
     transmitted = trace(record.p, refract(d, record.normal, 1.0f / record.material, inner), step + 1, !inner, lightRatio - length / 50);
   }
   else{
@@ -109,10 +115,11 @@ vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
 }
 
 void scene_create(){
-  light_list.push_back(make_pair(vec3(0, 0, 10), vec3(1, 1, 1)));
-  light_list.push_back(make_pair(vec3(-10, 0, 10), vec3(1, 1, 1)));
-  light_list.push_back(make_pair(vec3(10, 0, 10), vec3(1, 1, 1)));
-
+  
+  light_list.push_back(make_pair(vec3(0, 0, 0), vec3(1, 1, 1)));
+  light_list.push_back(make_pair(vec3(-10, 0, 0), vec3(1, 0, 0)));
+  light_list.push_back(make_pair(vec3(10, 0, 0), vec3(0, 1, 0)));
+  
   hitable_list.push_back(new plane(vec3(0, -5, 0), vec3(0, 1, 0), vec3(1.0f, 0.0f, 0.0f))); //ground
   hitable_list.push_back(new sphere(vec3(0, 0, -2), 0.5, vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.9f, 1.46f));
   hitable_list.push_back(new sphere(vec3(1, 0, -1.75), 0.5, vec3(1.0f, 1.0f, 1.0f), 0.9f));
@@ -132,48 +139,46 @@ void scene_create(){
   hitable_list.push_back(new compose(new sphere(vec3(0, -1, -4), 1.5, vec3(1, 1, 1), 0.0f, 0.9f, 1.46f),
                          new compose(new cube(vec3(-2, -3, -2), vec3(4, 0, 0), vec3(0, 4, 0), 4, vec3(1.0f, 1.0f, 0.0f)),
                                      new cube(vec3(-1.8, -2.8, -1), vec3(3.6, 0, 0), vec3(0, 3.6, 0), 6, vec3(1.0f, 0.0f, 0.0f)), 1), 2));
-  srand(1234);
+ srand(1234);
 
   vec3 colorlist[8] = { vec3(0.8, 0.3, 0.3), vec3(0.3, 0.8, 0.3), vec3(0.3, 0.3, 0.8),
     vec3(0.8, 0.8, 0.3), vec3(0.3, 0.8, 0.8), vec3(0.8, 0.3, 0.8),
     vec3(0.8, 0.8, 0.8), vec3(0.3, 0.3, 0.3) };
 
-  for (int i = 0; i < 48; i++) {
-    float xr = ((float)rand() / (float)(RAND_MAX)) * 6.0f - 3.0f;
-    float zr = ((float)rand() / (float)(RAND_MAX)) * 3.0f - 1.5f;
+  for (int i = 0; i < 12; i++) {
+    float xr = ((float)rand() / (float)(RAND_MAX)) * 60 - 30;
+    float yr = ((float)rand() / (float)(RAND_MAX)) * 30 - 15;
     int cindex = rand() % 8;
     float rand_reflec = ((float)rand() / (float)(RAND_MAX));
-    float rand_refrac = ((float)rand() / (float)(RAND_MAX));
-    hitable_list.push_back(new sphere(vec3(xr, -0.45, zr - 10), 0.1, colorlist[cindex], rand_reflec, 0));
+    rand_reflec = rand_reflec > 0.5 ? rand_reflec : 0;
+    hitable_list.push_back(new sphere(vec3(xr, yr, -15), 3, colorlist[cindex], rand_reflec));
   }
+
 }
 
 
 int main()
 {
-  int width = 200 * 3;
-  int height = 100 * 3;
-
   fstream file;
-  file.open("ray.ppm", ios::out);
+  file.open("ray2.ppm", ios::out);
 
   vec3 lower_left_corner(-2, -1, -1);
   vec3 origin(0, 0, 1);
   vec3 horizontal(4, 0, 0);
   vec3 vertical(0, 2, 0);
-  camera cam(vec3(2, 0, 10), vec3(0, 0, -1), vec3(0, 1, 0), 60,  float(width) / float(height), 0.1, 11);
+  camera cam(vec3(2, 0, 10), vec3(0, 0, -1), vec3(0, 1, 0), 60,  float(WIDTH) / float(HEIGHT), 0.1, 11);
 
-  file << "P3\n" << width << " " << height << "\n255\n";
+  file << "P3\n" << WIDTH << " " << HEIGHT << "\n255\n";
   
   scene_create();
 
-  for (int j = height - 1; j >= 0; j--) {
-    for (int i = 0; i < width; i++) {
+  for (int j = HEIGHT - 1; j >= 0; j--) {
+    for (int i = 0; i < WIDTH; i++) {
       float u[2], v[2];
-      u[0] = float(i) / float(width);
-      v[0] = float(j) / float(height);
-      u[1] = (float(i) + 0.5)/float(width);
-      v[1] = (float(j) - 0.5) / float(height);
+      u[0] = float(i) / float(WIDTH);
+      v[0] = float(j) / float(HEIGHT);
+      u[1] = (float(i) + 0.5) / float(WIDTH);
+      v[1] = (float(j) - 0.5) / float(HEIGHT);
 
       vec3 color_mix(0, 0, 0);
       for(int h = 0; h < 2; h++){

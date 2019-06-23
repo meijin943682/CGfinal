@@ -12,6 +12,7 @@ public:
   plane(vec3 p, vec3 n, vec3 col, vec3 col2 = vec3(1, 1, 1), float w_ri = 0.0f, float w_ti = 0.0f, float m = 1.0f) :
     hitable(col, w_ri, w_ti, m), point(p), normal(n), color2(col2) {};
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
+  void move(vec3 dir, float length){ point += unit_vector(dir) * length; }
   
   vec3 point;
   vec3 normal;

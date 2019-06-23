@@ -25,6 +25,7 @@ public:
   hitable() {};
   hitable(vec3 col, float w_ri, float w_ti, float m) : color(col), w_r(w_ri), w_t(w_ti), material(m) {};
   virtual bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list) = 0;
+  virtual void move(vec3 dir, float length) = 0;
 
   vec3 color;
   float w_r;

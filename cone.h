@@ -17,6 +17,7 @@ public:
       radian = atan(r / h);
   }
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
+  void move(vec3 dir, float length){ for(int i = 0; i < 2; i++) point[i] += unit_vector(dir) * length; }
 
 private:
   vec3 point[2];

@@ -11,6 +11,7 @@ public:
   sphere(vec3 c, float r, vec3 col, float w_ri = 0.0f, float w_ti = 0.0f, float m = 1.0f) : 
   hitable(col, w_ri, w_ti, m), center(c), radius(r) {};
   bool hit(const ray& r, float tmin, float tmax, vector<hit_record>& rec_list);
+  void move(vec3 dir, float length){ center += unit_vector(dir) * length; }
 
 private:
   vec3 center;
