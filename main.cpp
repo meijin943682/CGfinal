@@ -82,7 +82,7 @@ vec3 shading(hit_record ht, bool inner, vec3 reflect_ray, float lightRatio)
   return color;
 }
 
-vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
+vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio, vec3 init){
   vec3 local(0, 0, 0), reflected(0, 0, 0), transmitted(0, 0, 0);
   ray r(p, d);
   
@@ -102,15 +102,28 @@ vec3 trace(vec3 p, vec3 d, int step, bool inner, float lightRatio){
 
   if(record.t != TMAX){
     float length = record.t * r.direction().length();
-    lightRatio -= length / 50;
+    lightRatio -= length / 20;
     vec3 reflect_ray = unit_vector(d - 2 * dot(d, record.normal) * record.normal);
     local = shading(record, inner, reflect_ray, lightRatio);
-    reflected = trace(record.p, reflect_ray, step + 1, inner, lightRatio);
-    transmitted = trace(record.p, refract(d, record.normal, 1.0f / record.material, inner), step + 1, !inner, lightRatio);
+    reflected = trace(record.p, reflect_ray, step + 1, inner, lightRatio, init);
+    transmitted = trace(record.p, refract(d, record.normal, 1.0f / record.material, inner), step + 1, !inner, lightRatio, init);
+    /*if(vec3(0.698593, -4.34437, -10.2169).approch(init)){
+      cout << step << endl;
+      cout << "object = " << record.p << "color = " << record.color << endl;
+      cout << "local = " << local << endl;
+      cout << "reflected = " << reflected << endl;
+      cout << "trnsmitted = " << transmitted << endl << endl;
+    }
+    */
   }
   else{
     float t = 0.5 * (d.y() + 1.0);
     local = (1.0 - t) * vec3(1, 1, 1) + t * vec3(0.5, 0.7, 1.0);
+    /*if(vec3(0.698593, -4.34437, -10.2169).approch(init)){
+      cout << step << " " << t << " " << d.y() << endl;
+      cout << "local = " << local << endl << endl;
+    }
+    */
     return local;
   }
   return  (1.0 - record.w_t) * ((1.0 - record.w_r) * local + record.w_r * reflected) + record.w_t * transmitted;
@@ -121,7 +134,9 @@ void scene_create(){
   light_list.push_back(make_pair(vec3(-10, 0, 0), vec3(1, 1, 1)));
   light_list.push_back(make_pair(vec3(10, 0, 0), vec3(1, 1, 1)));
   
+  
   hitable_list.push_back(new plane(vec3(0, -5, 0), vec3(0, 1, 0), vec3(1.0f, 0.0f, 0.0f))); //ground
+  
   hitable_list.push_back(new compose(
                          new compose(
                          new compose(
@@ -131,12 +146,20 @@ void scene_create(){
                                      new cube(vec3(-1.5, -3, -2.5), vec3(3, 0, 0), vec3(0, 6, 0), 3, vec3(0.0f, 1.0f, 0.0f)), 1),
                                      new sphere(vec3(0, 0, -4), 1.5, vec3(1, 1, 1), 0.0f, 0.9f, 1.46f), 0)); 
 
-  hitable_list.push_back(new compose(new sphere(vec3(4, 0, -4), 1.5, vec3(1, 1, 1), 0.9f), 
-                                     new sphere(vec3(5, 0, -4), 1.5, vec3(1, 1, 1), 0.9f), 2));
+  hitable_list.push_back(new compose(new sphere(vec3(4, 0, -4), 1.5, vec3(1, 1, 1), 0.0f, 0.9f, 1.4), 
+                                     new sphere(vec3(5, 0, -4), 1.5, vec3(1, 1, 1), 0.9f), 1));
   
   hitable_list.push_back(new compose(new sphere(vec3(-4, 0, -4), 1.5, vec3(1, 0, 0)), 
                                      new sphere(vec3(-5, 0, -4), 1.5, vec3(0, 1, 0)), 0));
- /*
+  
+  //hitable_list.push_back(new compose(new sphere(vec3(0, 0, -5), 4, vec3(1, 0 , 0), 0.0f, 0.9f, 1.4), 
+  //                                   new sphere(vec3(0, 0, -5), 2.5, vec3(0, 0, 1), 0.9f), 1));
+
+  //hitable_list.push_back(new sphere(vec3(-9, 0, -10), 2, vec3(1, 0 , 0)));
+  //hitable_list.push_back(new cube(vec3(-6.5, -2, -10), vec3(4, 0, 0), vec3(0, 4, 0), 4, vec3(1, 0 ,0)));
+  //hitable_list.push_back(new cylinder(vec3(0, 2, -10), vec3(0, -1, 0), 1, 4, vec3(0, 1, 0)));
+  //hitable_list.push_back(new cone(vec3(3, 2, -10), vec3(0, -1, 0), 1, 4, vec3(0, 0, 1)));
+  /*
   srand(1234);
 
   vec3 colorlist[8] = { vec3(0.8, 0.3, 0.3), vec3(0.3, 0.8, 0.3), vec3(0.3, 0.3, 0.8),
@@ -183,7 +206,7 @@ int main()
         for(int h = 0; h < 2; h++){
           for(int k = 0; k < 2; k++){
             ray r = cam.get_ray(u[h], v[k]);
-            color_mix = color_mix + trace(r.origin(), unit_vector(r.direction()), 0, false, 1.0);
+            color_mix = color_mix + trace(r.origin(), unit_vector(r.direction()), 0, false, 1.0, r.direction());
           }
         }
         vec3 mean_color = color_mix / 4;

@@ -41,6 +41,7 @@ public:
   
 	inline float length() const { return float(sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2])); }
 	inline float squared_length() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
+  inline bool approch(const vec3 &v2) const { return (abs(this -> e[0] - v2.e[0]) + abs(this -> e[1] - v2.e[1]) + abs(this -> e[2] - v2.e[2])) < 0.001; }
 	inline void make_unit_vector();
 
 	float e[3];
@@ -66,6 +67,7 @@ inline vec3 cross(const vec3 &v1, const vec3 &v2) {
 }
 
 inline vec3 unit_vector(vec3 v) {
+  if(v.length() == 0) return v;
   return vec3(v.e[0] / v.length(), v.e[1] / v.length(), v.e[2] / v.length());
 }
 
